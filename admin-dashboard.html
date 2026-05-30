@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta r-gradient(135deg, #2c3e50, #4ca1af);
+            color: #ecf0f1;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        header {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(90deg, #34495e, #2c3e50);
+            transition: background 0.5s ease-in-out;
+        }
+
+        header:hover {
+            background: linear-gradient(90deg, #4ca1af, #34495e);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .card:hover {
+            transform: rotateY(10deg) scale(1.05);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(90deg, #4ca1af, #2c3e50);
+            border: none;
+            color: #ffffff;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn:hover {
+            background: linear-gradient(90deg, #2c3e50, #4ca1af);
+            transform: scale(1.1);
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #4ca1af;
+            box-shadow: 0 0 10px rgba(76, 161, 175, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-dark text-white py-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="h3 text-uppercase">Admin Dashboard</h1>
+            <nav>
+                <ul class="nav">
+                    <li class="nav-item"><a href="index.html" class="nav-link text-white">Home</a></li>
+                    <li class="nav-item"><a href="admin-dashboard.html" class="nav-link text-white">Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center text-primary mb-4">Admin Login</h2>
+            <form id="admin-login-form" class="mx-auto" style="max-width: 400px;">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="dashboard-content" class="py-5" style="display: none;">
+        <div class="container">
+            <h2 class="text-center text-primary mb-4">Admin Dashboard</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                            <h5 class="card-title">Edit Content</h5>
+                            <p class="card-text">Edit content on any page.</p>
+                            <button id="edit-content" class="btn btn-primary">Edit</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-plus fa-3x text-success mb-3"></i>
+                            <h5 class="card-title">Add Content</h5>
+                            <p class="card-text">Add new content to pages.</p>
+                            <button id="add-content" class="btn btn-success">Add</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-trash fa-3x text-danger mb-3"></i>
+                            <h5 class="card-title">Delete Content</h5>
+                            <p class="card-text">Remove content from pages.</p>
+                            <button id="delete-content" class="btn btn-danger">Delete</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users fa-3x text-info mb-3"></i>
+                            <h5 class="card-title">User Management</h5>
+                            <p class="card-text">Add, edit, or delete users.</p>
+                            <button id="manage-users" class="btn btn-info">Manage Users</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Added placeholders for enhanced functionality -->
+    <section id="analytics" class="py-5">
+        <div class="container">
+            <h2 class="text-center text-primary mb-4">Dashboard Analytics</h2>
+            <canvas id="analyticsChart" width="400" height="200"></canvas>
+        </div>
+    </section>
+
+    <section id="image-management" class="py-5">
+        <div class="container">
+            <h2 class="text-center text-primary mb-4">Image Management</h2>
+            <form id="image-upload-form" class="mb-4">
+                <input type="file" id="image-upload" class="form-control mb-3" accept="image/*">
+                <button type="submit" class="btn btn-success">Upload Image</button>
+            </form>
+            <div id="image-gallery" class="row">
+                <!-- Dynamically populated image gallery -->
+            </div>
+        </div>
+    </section>
+
+    <section id="user-management" class="py-5">
+        <div class="container">
+            <h2 class="text-center text-primary mb-4">User Management</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="user-table-body">
+                    <!-- Dynamically populated user table -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <button id="logout-button" class="btn btn-danger" style="margin-top: 20px;">Logout</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('admin-login-form');
+            const dashboardContent = document.getElementById('dashboard-content');
+            const logoutButton = document.createElement('button');
+            logoutButton.textContent = 'Logout';
+            logoutButton.className = 'btn btn-danger';
+            logoutButton.style.marginTop = '20px';
+
+            if (!loginForm || !dashboardContent) {
+                console.error('Login form or dashboard content not found. Ensure the elements exist in the HTML.');
+                return;
+            }
+
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+
+            if (isLoggedIn) {
+                loginForm.style.display = 'none';
+                dashboardContent.style.display = 'block';
+                dashboardContent.appendChild(logoutButton);
+            } else {
+                loginForm.style.display = 'block';
+                dashboardContent.style.display = 'none';
+            }
+
+            logoutButton.addEventListener('click', function() {
+                sessionStorage.removeItem('isLoggedIn');
+                alert('Logged out successfully!');
+                location.reload();
+            });
+
+            const pages = ['index.html', 'about.html', 'contact.html', 'events.html', 'gallery.html'];
+
+            const createPageSelector = (action) => {
+                const selector = document.createElement('select');
+                selector.className = 'form-select mb-3';
+                selector.innerHTML = pages.map(page => `<option value="${page}">${page}</option>`).join('');
+                const button = document.createElement('button');
+                button.className = 'btn btn-primary';
+                button.textContent = action;
+                return { selector, button };
+            };
+
+            loginForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                if (username === 'admin' && password === 'good256') {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    alert('Login successful!');
+                    loginForm.style.display = 'none';
+                    dashboardContent.style.display = 'block';
+                    dashboardContent.appendChild(logoutButton);
+                } else {
+                    alert('Invalid credentials. Please try again.');
+                }
+            });
+
+            const clearOldUI = () => {
+                const oldSelectors = dashboardContent.querySelectorAll('select.form-select');
+                const oldButtons = dashboardContent.querySelectorAll('button.btn-primary:not(#edit-content):not(#add-content):not(#delete-content):not(#manage-users)');
+                oldSelectors.forEach(sel => sel.remove());
+                oldButtons.forEach(btn => btn.remove());
+            };
+
+            document.getElementById('edit-content').addEventListener('click', function() {
+                clearOldUI();
+                const { selector, button } = createPageSelector('Edit Content');
+                dashboardContent.appendChild(selector);
+                dashboardContent.appendChild(button);
+
+                button.addEventListener('click', () => {
+                    const page = selector.value;
+                    const content = prompt(`Enter the new content for ${page}:`);
+                    if (content) {
+                        localStorage.setItem(`content-${page}`, content);
+                        alert(`Content for ${page} updated successfully!`);
+                    }
+                });
+            });
+
+            document.getElementById('add-content').addEventListener('click', function() {
+                clearOldUI();
+                const { selector, button } = createPageSelector('Add Content');
+                dashboardContent.appendChild(selector);
+                dashboardContent.appendChild(button);
+
+                button.addEventListener('click', () => {
+                    const page = selector.value;
+                    const content = prompt(`Enter the content to add to ${page}:`);
+                    if (content) {
+                        const existingContent = localStorage.getItem(`content-${page}`) || '';
+                        localStorage.setItem(`content-${page}`, existingContent + '\n' + content);
+                        alert(`Content added to ${page} successfully!`);
+                    }
+                });
+            });
+
+            document.getElementById('delete-content').addEventListener('click', function() {
+                clearOldUI();
+                const { selector, button } = createPageSelector('Delete Content');
+                dashboardContent.appendChild(selector);
+                dashboardContent.appendChild(button);
+
+                button.addEventListener('click', () => {
+                    const page = selector.value;
+                    if (confirm(`Are you sure you want to delete all content from ${page}?`)) {
+                        localStorage.removeItem(`content-${page}`);
+                        alert(`Content for ${page} deleted successfully!`);
+                    }
+                });
+            });
+
+            const users = JSON.parse(localStorage.getItem('adminUsers')) || [];
+
+            const saveUsers = () => {
+                localStorage.setItem('adminUsers', JSON.stringify(users));
+            };
+
+            document.getElementById('manage-users').addEventListener('click', function() {
+                const action = prompt('Enter action: add, edit, or delete user');
+                if (action === 'add') {
+                    const username = prompt('Enter username to add:');
+                    const password = prompt('Enter password:');
+                    if (username && password) {
+                        if (users.some(u => u.username === username)) {
+                            alert('User already exists!');
+                        } else {
+                            users.push({ username, password });
+                            saveUsers();
+                            alert(`User ${username} added successfully!`);
+                        }
+                    }
+                } else if (action === 'edit') {
+                    const username = prompt('Enter username to edit:');
+                    const user = users.find(u => u.username === username);
+                    if (user) {
+                        const newUsername = prompt('Enter new username:');
+                        const newPassword = prompt('Enter new password:');
+                        if (newUsername) user.username = newUsername;
+                        if (newPassword) user.password = newPassword;
+                        saveUsers();
+                        alert(`User ${username} updated successfully!`);
+                    } else {
+                        alert('User not found!');
+                    }
+                } else if (action === 'delete') {
+                    const username = prompt('Enter username to delete:');
+                    const index = users.findIndex(u => u.username === username);
+                    if (index !== -1 && confirm(`Are you sure you want to delete ${username}?`)) {
+                        users.splice(index, 1);
+                        saveUsers();
+                        alert(`User ${username} deleted successfully!`);
+                    } else {
+                        alert('User not found!');
+                    }
+                } else {
+                    alert('Invalid action. Please enter add, edit, or delete.');
+                }
+            });
+
+            // Placeholder for analytics chart
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            const analyticsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Users', 'Content Updates', 'Images'],
+                    datasets: [{
+                        label: 'Statistics',
+                        data: [0, 0, 0],
+                        backgroundColor: ['#4ca1af', '#2c3e50', '#34495e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Placeholder for image upload functionality
+            document.getElementById('image-upload-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const fileInput = document.getElementById('image-upload');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    alert(`Image ${file.name} uploaded successfully!`);
+                    // Backend integration needed here
+                }
+            });
+
+            // Placeholder for user table population
+            const userTableBody = document.getElementById('user-table-body');
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.role || 'Admin'}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm">Edit</button>
+                        <button class="btn btn-danger btn-sm">Delete</button>
+                    </td>
+                `;
+                userTableBody.appendChild(row);
+            });
+        });
+    </script>
+</body>
+</html>
