@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="St. Aloysius Senior Secondary School - Quality education with engaging academics and supportive campus life.">
+    <meta name="theme-color" content="#2563eb">
     <title>St. Aloysius International School</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -12,7 +14,10 @@
     <header class="site-header">
         <div class="container header-inner">
             <a href="index.html" class="brand">St. Aloysius</a>
-            <nav>
+            <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav role="navigation">
                 <ul class="nav-list">
                     <li><a href="index.html" class="active">Home</a></li>
                     <li><a href="about.html">About</a></li>
@@ -27,7 +32,7 @@
     </header>
 
     <main>
-        <section class="hero">
+        <section class="hero" role="banner">
             <div class="hero-content">
                 <span class="eyebrow">A welcoming community</span>
                 <h1>Inspiring excellence in every student</h1>
@@ -43,22 +48,22 @@
             <div class="container">
                 <div class="stats-strip">
                     <article class="stat-card">
-                        <span class="stat-icon"><i class="fas fa-user-graduate"></i></span>
+                        <span class="stat-icon"><i class="fas fa-user-graduate" aria-hidden="true"></i></span>
                         <strong>600+</strong>
                         <p>Students inspired every year</p>
                     </article>
                     <article class="stat-card">
-                        <span class="stat-icon"><i class="fas fa-award"></i></span>
+                        <span class="stat-icon"><i class="fas fa-award" aria-hidden="true"></i></span>
                         <strong>45+</strong>
                         <p>Awards and campus achievements</p>
                     </article>
                     <article class="stat-card">
-                        <span class="stat-icon"><i class="fas fa-heart"></i></span>
+                        <span class="stat-icon"><i class="fas fa-heart" aria-hidden="true"></i></span>
                         <strong>30+</strong>
                         <p>Active clubs and student groups</p>
                     </article>
                     <article class="stat-card">
-                        <span class="stat-icon"><i class="fas fa-school"></i></span>
+                        <span class="stat-icon"><i class="fas fa-school" aria-hidden="true"></i></span>
                         <strong>65</strong>
                         <p>Years of trusted education</p>
                     </article>
@@ -74,17 +79,17 @@
                 </div>
                 <div class="grid grid-3">
                     <article class="card feature-card">
-                        <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
+                        <div class="feature-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></div>
                         <h3>Strong Academics</h3>
                         <p>Future-ready learning built on critical thinking and confidence.</p>
                     </article>
                     <article class="card feature-card">
-                        <div class="feature-icon"><i class="fas fa-heart"></i></div>
+                        <div class="feature-icon"><i class="fas fa-heart" aria-hidden="true"></i></div>
                         <h3>Student Well-being</h3>
                         <p>Personal support, values-led guidance, and a safe campus culture.</p>
                     </article>
                     <article class="card feature-card">
-                        <div class="feature-icon"><i class="fas fa-school"></i></div>
+                        <div class="feature-icon"><i class="fas fa-school" aria-hidden="true"></i></div>
                         <h3>Active Campus Life</h3>
                         <p>Clubs, sports, and community events that build character and joy.</p>
                     </article>
@@ -100,15 +105,15 @@
                 </div>
                 <div class="testimonial-grid">
                     <article class="testimonial-card">
-                        <p>“This school helped my son grow academically while nurturing his confidence and creativity.”</p>
+                        <p>"This school helped my son grow academically while nurturing his confidence and creativity."</p>
                         <p class="testimonial-author">— Parent</p>
                     </article>
                     <article class="testimonial-card">
-                        <p>“The teachers here make every class feel exciting, and I always look forward to school.”</p>
+                        <p>"The teachers here make every class feel exciting, and I always look forward to school."</p>
                         <p class="testimonial-author">— Student</p>
                     </article>
                     <article class="testimonial-card">
-                        <p>“I’m proud to be an alumnus of St. Aloysius—great people, fun culture, and real achievement.”</p>
+                        <p>"I'm proud to be an alumnus of St. Aloysius—great people, fun culture, and real achievement."</p>
                         <p class="testimonial-author">— Alumnus</p>
                     </article>
                 </div>
@@ -150,14 +155,52 @@
         <div class="footer-inner">
             <p class="footer-brand">St. Aloysius Senior Secondary School</p>
             <div class="footer-links">
-                <a href="#">Facebook</a>
-                <a href="#">Twitter</a>
-                <a href="#">Instagram</a>
+                <a href="#" aria-label="Follow us on Facebook">Facebook</a>
+                <a href="#" aria-label="Follow us on Twitter">Twitter</a>
+                <a href="#" aria-label="Follow us on Instagram">Instagram</a>
             </div>
         </div>
     </footer>
 
+    <button class="back-to-top" id="backToTop" aria-label="Back to top"></button>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const body = document.body;
+        
+        navToggle.addEventListener('click', () => {
+            body.classList.toggle('nav-open');
+            navToggle.setAttribute('aria-expanded', body.classList.contains('nav-open'));
+        });
+
+        // Close menu when a link is clicked
+        document.querySelectorAll('.nav-list a').forEach(link => {
+            link.addEventListener('click', () => {
+                body.classList.remove('nav-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+
+        // Back to top button
+        const backToTopBtn = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Add scroll icon to back to top button
+        backToTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    </script>
     <script src="scripts.js" defer></script>
 </body>
 </html>
