@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --sidebar-width: 260px;
@@ -18,462 +19,86 @@
             --text: #0f172a;
             --muted: #64748b;
             --border: #e2e8f0;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
         }
-
         * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-
-        /* ========== LOGIN ========== */
-        #login-screen {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #ec4899 100%);
-            padding: 1.5rem;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 20px;
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-        }
-
-        .login-card h1 {
-            font-size: 1.75rem;
-            font-weight: 800;
-            margin-bottom: 0.25rem;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .login-card .subtitle {
-            color: var(--muted);
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-        }
-
-        /* ========== APP LAYOUT ========== */
-        #app {
-            display: none;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: var(--sidebar-width);
-            height: 100vh;
-            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-            color: white;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem 1.25rem;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .sidebar-header .logo {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 1.1rem;
-        }
-
-        .sidebar-header h2 {
-            font-size: 1.1rem;
-            margin: 0;
-            font-weight: 700;
-        }
-
-        .sidebar-header small {
-            display: block;
-            color: #94a3b8;
-            font-size: 0.75rem;
-        }
-
-        .sidebar-nav {
-            flex: 1;
-            padding: 1rem 0.75rem;
-            overflow-y: auto;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
-            padding: 0.85rem 1rem;
-            border-radius: 12px;
-            color: #cbd5e1;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            margin-bottom: 0.35rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background: rgba(37, 99, 235, 0.25);
-            color: white;
-        }
-
-        .nav-item.active {
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35);
-        }
-
-        .nav-item i {
-            width: 22px;
-            text-align: center;
-            font-size: 1.05rem;
-        }
-
-        .sidebar-footer {
-            padding: 1rem 1.25rem;
-            border-top: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .user-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .main-content {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            padding: 1.5rem 2rem 3rem;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.75rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .topbar h1 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin: 0;
-        }
-
-        .topbar .date {
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-
-        /* ========== CARDS & STATS ========== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 1.75rem;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 1.4rem 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            color: white;
-            flex-shrink: 0;
-        }
-
+        body { margin: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #ec4899 100%); padding: 1.5rem; }
+        .login-card { background: white; border-radius: 20px; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        .login-card h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .login-card .subtitle { color: var(--muted); margin-bottom: 2rem; font-size: 0.95rem; }
+        #app { display: none; min-height: 100vh; }
+        .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh; background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%); color: white; z-index: 1000; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+        .sidebar-header { padding: 1.5rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-header .logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; }
+        .sidebar-header h2 { font-size: 1.1rem; margin: 0; font-weight: 700; }
+        .sidebar-header small { display: block; color: #94a3b8; font-size: 0.75rem; }
+        .sidebar-nav { flex: 1; padding: 1rem 0.75rem; overflow-y: auto; }
+        .nav-item { display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1rem; border-radius: 12px; color: #cbd5e1; text-decoration: none; font-weight: 500; font-size: 0.95rem; margin-bottom: 0.35rem; transition: all 0.2s ease; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .nav-item:hover, .nav-item.active { background: rgba(37, 99, 235, 0.25); color: white; }
+        .nav-item.active { background: linear-gradient(135deg, var(--primary), #3b82f6); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.35); }
+        .nav-item i { width: 22px; text-align: center; font-size: 1.05rem; }
+        .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,0.08); }
+        .user-info { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .user-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; padding: 1.5rem 2rem 3rem; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem; }
+        .topbar h1 { font-size: 1.6rem; font-weight: 800; margin: 0; }
+        .topbar .date { color: var(--muted); font-size: 0.9rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem; }
+        .stat-card { background: var(--surface); border-radius: 16px; padding: 1.4rem 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 1rem; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: white; flex-shrink: 0; }
         .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
         .stat-icon.pink { background: linear-gradient(135deg, #ec4899, #db2777); }
         .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
         .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
-
-        .stat-card h3 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin: 0 0 0.15rem;
-        }
-
-        .stat-card p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.9rem;
-        }
-
-        /* ========== PANEL ========== */
-        .panel {
-            background: var(--surface);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-
-        .panel-header {
-            padding: 1.15rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .panel-header h2 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .panel-body {
-            padding: 1.5rem;
-        }
-
-        /* ========== TABLES ========== */
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table th {
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-            color: var(--muted);
-            border-bottom-width: 1px;
-            background: #f8fafc;
-        }
-
-        .table td {
-            vertical-align: middle;
-            font-size: 0.95rem;
-        }
-
-        .badge-status {
-            padding: 0.35rem 0.7rem;
-            border-radius: 50px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
-
+        .stat-card h3 { font-size: 1.6rem; font-weight: 800; margin: 0 0 0.15rem; }
+        .stat-card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+        .panel { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 1.5rem; overflow: hidden; }
+        .panel-header { padding: 1.15rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+        .panel-header h2 { font-size: 1.15rem; font-weight: 700; margin: 0; }
+        .panel-body { padding: 1.5rem; }
+        .table { margin-bottom: 0; }
+        .table th { font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); border-bottom-width: 1px; background: #f8fafc; }
+        .table td { vertical-align: middle; font-size: 0.95rem; }
+        .badge-status { padding: 0.35rem 0.7rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; }
         .badge-new { background: #dbeafe; color: #1d4ed8; }
         .badge-read { background: #e2e8f0; color: #475569; }
         .badge-replied { background: #d1fae5; color: #047857; }
-
-        /* ========== BUTTONS ========== */
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), #3b82f6);
-            border: none;
-            font-weight: 600;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-        }
-
-        .btn-sm {
-            font-size: 0.82rem;
-            padding: 0.3rem 0.7rem;
-        }
-
-        /* ========== FORMS ========== */
-        .form-label {
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .form-control, .form-select {
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            padding: 0.65rem 0.9rem;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-
-        /* ========== GALLERY ========== */
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 1rem;
-        }
-
-        .gallery-item {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            aspect-ratio: 1;
-            background: #e2e8f0;
-            border: 1px solid var(--border);
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gallery-item .actions {
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .gallery-item:hover .actions {
-            opacity: 1;
-        }
-
-        /* ========== SECTION VISIBILITY ========== */
+        .btn-primary { background: linear-gradient(135deg, var(--primary), #3b82f6); border: none; font-weight: 600; }
+        .btn-primary:hover { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); }
+        .btn-sm { font-size: 0.82rem; padding: 0.3rem 0.7rem; }
+        .form-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; }
+        .form-control, .form-select { border-radius: 10px; border: 1px solid var(--border); padding: 0.65rem 0.9rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
+        .gallery-item { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 1; background: #e2e8f0; border: 1px solid var(--border); }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-item .actions { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; gap: 0.5rem; opacity: 0; transition: opacity 0.2s; }
+        .gallery-item:hover .actions { opacity: 1; }
         .section { display: none; }
         .section.active { display: block; }
-
-        /* ========== MOBILE ========== */
-        .mobile-toggle {
-            display: none;
-            background: var(--primary);
-            color: white;
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            font-size: 1.2rem;
-        }
-
+        .mobile-toggle { display: none; background: var(--primary); color: white; border: none; width: 42px; height: 42px; border-radius: 10px; font-size: 1.2rem; }
         @media (max-width: 992px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-                padding: 1.25rem 1rem 2rem;
-            }
-            .mobile-toggle {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0.45);
-                z-index: 999;
-            }
-            .sidebar-overlay.show {
-                display: block;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1.25rem 1rem 2rem; }
+            .mobile-toggle { display: inline-flex; align-items: center; justify-content: center; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 999; }
+            .sidebar-overlay.show { display: block; }
         }
-
-        /* ========== EMPTY STATE ========== */
-        .empty-state {
-            text-align: center;
-            padding: 2.5rem 1rem;
-            color: var(--muted);
-        }
-
-        .empty-state i {
-            font-size: 2.5rem;
-            margin-bottom: 0.75rem;
-            opacity: 0.4;
-        }
-
-        /* ========== CHART CONTAINER ========== */
-        .chart-container {
-            position: relative;
-            height: 280px;
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 1.25rem;
-            right: 1.25rem;
-            z-index: 2000;
-        }
+        .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
+        .chart-container { position: relative; height: 280px; }
+        .toast-container { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 2000; }
+        .loading { opacity: 0.6; pointer-events: none; }
     </style>
 </head>
 <body>
-    <!-- LOGIN SCREEN -->
     <div id="login-screen">
         <div class="login-card">
             <h1>St. Aloysius</h1>
-            <p class="subtitle">Admin Dashboard Login</p>
+            <p class="subtitle">Admin Dashboard Login (Supabase)</p>
             <form id="login-form">
                 <div class="mb-3">
                     <label class="form-label" for="username">Username</label>
@@ -483,11 +108,7 @@
                     <label class="form-label" for="password">Password</label>
                     <input type="password" class="form-control" id="password" placeholder="Enter password" required autocomplete="current-password">
                 </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="remember">
-                    <label class="form-check-label" for="remember">Remember me</label>
-                </div>
-                <button type="submit" class="btn btn-primary w-100 py-2">Sign In</button>
+                <button type="submit" class="btn btn-primary w-100 py-2" id="login-btn">Sign In</button>
             </form>
             <p class="text-muted text-center mt-3 mb-0" style="font-size:0.85rem">
                 Default: <strong>admin</strong> / <strong>admin123</strong>
@@ -495,11 +116,8 @@
         </div>
     </div>
 
-    <!-- APP -->
     <div id="app">
         <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-        <!-- SIDEBAR -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">SA</div>
@@ -508,31 +126,15 @@
                     <small>Admin Panel</small>
                 </div>
             </div>
-
             <nav class="sidebar-nav">
-                <button class="nav-item active" data-section="dashboard">
-                    <i class="fas fa-chart-pie"></i> Dashboard
-                </button>
-                <button class="nav-item" data-section="content">
-                    <i class="fas fa-edit"></i> Content Manager
-                </button>
-                <button class="nav-item" data-section="events">
-                    <i class="fas fa-calendar-alt"></i> Events
-                </button>
-                <button class="nav-item" data-section="gallery">
-                    <i class="fas fa-images"></i> Gallery
-                </button>
-                <button class="nav-item" data-section="submissions">
-                    <i class="fas fa-inbox"></i> Submissions
-                </button>
-                <button class="nav-item" data-section="users">
-                    <i class="fas fa-users"></i> Users
-                </button>
-                <button class="nav-item" data-section="analytics">
-                    <i class="fas fa-chart-line"></i> Analytics
-                </button>
+                <button class="nav-item active" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+                <button class="nav-item" data-section="content"><i class="fas fa-edit"></i> Content Manager</button>
+                <button class="nav-item" data-section="events"><i class="fas fa-calendar-alt"></i> Events</button>
+                <button class="nav-item" data-section="gallery"><i class="fas fa-images"></i> Gallery</button>
+                <button class="nav-item" data-section="submissions"><i class="fas fa-inbox"></i> Submissions</button>
+                <button class="nav-item" data-section="users"><i class="fas fa-users"></i> Users</button>
+                <button class="nav-item" data-section="analytics"><i class="fas fa-chart-line"></i> Analytics</button>
             </nav>
-
             <div class="sidebar-footer">
                 <div class="user-info">
                     <div class="user-avatar" id="user-avatar">A</div>
@@ -541,13 +143,10 @@
                         <div style="font-size:0.75rem;color:#94a3b8">Administrator</div>
                     </div>
                 </div>
-                <button class="btn btn-outline-light btn-sm w-100" id="logout-btn">
-                    <i class="fas fa-sign-out-alt me-1"></i> Logout
-                </button>
+                <button class="btn btn-outline-light btn-sm w-100" id="logout-btn"><i class="fas fa-sign-out-alt me-1"></i> Logout</button>
             </div>
         </aside>
 
-        <!-- MAIN -->
         <main class="main-content">
             <div class="topbar">
                 <div class="d-flex align-items-center gap-3">
@@ -557,506 +156,201 @@
                         <div class="date" id="current-date"></div>
                     </div>
                 </div>
-                <a href="index.html" class="btn btn-outline-primary btn-sm" target="_blank">
-                    <i class="fas fa-external-link-alt me-1"></i> View Website
-                </a>
+                <a href="index.html" class="btn btn-outline-primary btn-sm" target="_blank"><i class="fas fa-external-link-alt me-1"></i> View Website</a>
             </div>
 
-            <!-- DASHBOARD SECTION -->
             <section id="section-dashboard" class="section active">
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon blue"><i class="fas fa-file-alt"></i></div>
-                        <div>
-                            <h3 id="stat-pages">0</h3>
-                            <p>Managed Pages</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon pink"><i class="fas fa-calendar-check"></i></div>
-                        <div>
-                            <h3 id="stat-events">0</h3>
-                            <p>Upcoming Events</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon green"><i class="fas fa-images"></i></div>
-                        <div>
-                            <h3 id="stat-images">0</h3>
-                            <p>Gallery Images</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon orange"><i class="fas fa-envelope"></i></div>
-                        <div>
-                            <h3 id="stat-submissions">0</h3>
-                            <p>New Submissions</p>
-                        </div>
-                    </div>
+                    <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-file-alt"></i></div><div><h3 id="stat-pages">0</h3><p>Managed Pages</p></div></div>
+                    <div class="stat-card"><div class="stat-icon pink"><i class="fas fa-calendar-check"></i></div><div><h3 id="stat-events">0</h3><p>Upcoming Events</p></div></div>
+                    <div class="stat-card"><div class="stat-icon green"><i class="fas fa-images"></i></div><div><h3 id="stat-images">0</h3><p>Gallery Images</p></div></div>
+                    <div class="stat-card"><div class="stat-icon orange"><i class="fas fa-envelope"></i></div><div><h3 id="stat-submissions">0</h3><p>New Submissions</p></div></div>
                 </div>
-
                 <div class="row g-4">
                     <div class="col-lg-8">
-                        <div class="panel">
-                            <div class="panel-header">
-                                <h2>Visitors Overview</h2>
-                            </div>
-                            <div class="panel-body">
-                                <div class="chart-container">
-                                    <canvas id="visitorsChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="panel"><div class="panel-header"><h2>Visitors Overview</h2></div><div class="panel-body"><div class="chart-container"><canvas id="visitorsChart"></canvas></div></div></div>
                     </div>
                     <div class="col-lg-4">
-                        <div class="panel">
-                            <div class="panel-header">
-                                <h2>Quick Actions</h2>
-                            </div>
+                        <div class="panel"><div class="panel-header"><h2>Quick Actions</h2></div>
                             <div class="panel-body d-grid gap-2">
-                                <button class="btn btn-outline-primary text-start" onclick="showSection('content')">
-                                    <i class="fas fa-edit me-2"></i> Edit Page Content
-                                </button>
-                                <button class="btn btn-outline-primary text-start" onclick="showSection('events')">
-                                    <i class="fas fa-plus me-2"></i> Add New Event
-                                </button>
-                                <button class="btn btn-outline-primary text-start" onclick="showSection('gallery')">
-                                    <i class="fas fa-upload me-2"></i> Upload Images
-                                </button>
-                                <button class="btn btn-outline-primary text-start" onclick="showSection('submissions')">
-                                    <i class="fas fa-inbox me-2"></i> View Submissions
-                                </button>
+                                <button class="btn btn-outline-primary text-start" onclick="showSection('content')"><i class="fas fa-edit me-2"></i> Edit Page Content</button>
+                                <button class="btn btn-outline-primary text-start" onclick="showSection('events')"><i class="fas fa-plus me-2"></i> Add New Event</button>
+                                <button class="btn btn-outline-primary text-start" onclick="showSection('gallery')"><i class="fas fa-upload me-2"></i> Upload Images</button>
+                                <button class="btn btn-outline-primary text-start" onclick="showSection('submissions')"><i class="fas fa-inbox me-2"></i> View Submissions</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- CONTENT MANAGER -->
             <section id="section-content" class="section">
                 <div class="panel">
-                    <div class="panel-header">
-                        <h2>Page Content Manager</h2>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#contentModal" onclick="openContentModal()">
-                            <i class="fas fa-plus me-1"></i> Add Content
-                        </button>
+                    <div class="panel-header"><h2>Page Content Manager</h2>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#contentModal" onclick="openContentModal()"><i class="fas fa-plus me-1"></i> Add Content</button>
                     </div>
-                    <div class="panel-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4">Page</th>
-                                        <th>Preview</th>
-                                        <th>Last Updated</th>
-                                        <th class="text-end pe-4">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="content-table-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="panel-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th class="ps-4">Page</th><th>Preview</th><th>Last Updated</th><th class="text-end pe-4">Actions</th></tr></thead><tbody id="content-table-body"></tbody></table></div></div>
                 </div>
             </section>
 
-            <!-- EVENTS -->
             <section id="section-events" class="section">
                 <div class="panel">
-                    <div class="panel-header">
-                        <h2>Events Manager</h2>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#eventModal" onclick="openEventModal()">
-                            <i class="fas fa-plus me-1"></i> Add Event
-                        </button>
+                    <div class="panel-header"><h2>Events Manager</h2>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#eventModal" onclick="openEventModal()"><i class="fas fa-plus me-1"></i> Add Event</button>
                     </div>
-                    <div class="panel-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4">Event</th>
-                                        <th>Date</th>
-                                        <th>Location</th>
-                                        <th>Status</th>
-                                        <th class="text-end pe-4">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="events-table-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="panel-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th class="ps-4">Event</th><th>Date</th><th>Location</th><th>Status</th><th class="text-end pe-4">Actions</th></tr></thead><tbody id="events-table-body"></tbody></table></div></div>
                 </div>
             </section>
 
-            <!-- GALLERY -->
             <section id="section-gallery" class="section">
                 <div class="panel">
-                    <div class="panel-header">
-                        <h2>Gallery Manager</h2>
-                        <div>
-                            <input type="file" id="image-upload" accept="image/*" multiple class="d-none">
-                            <button class="btn btn-primary btn-sm" onclick="document.getElementById('image-upload').click()">
-                                <i class="fas fa-upload me-1"></i> Upload Images
-                            </button>
-                        </div>
+                    <div class="panel-header"><h2>Gallery Manager</h2>
+                        <div><input type="file" id="image-upload" accept="image/*" multiple class="d-none">
+                        <button class="btn btn-primary btn-sm" onclick="document.getElementById('image-upload').click()"><i class="fas fa-upload me-1"></i> Upload Images</button></div>
                     </div>
-                    <div class="panel-body">
-                        <div class="gallery-grid" id="gallery-grid"></div>
-                        <div class="empty-state" id="gallery-empty" style="display:none">
-                            <i class="fas fa-images"></i>
-                            <p>No images yet. Upload some to get started.</p>
-                        </div>
-                    </div>
+                    <div class="panel-body"><div class="gallery-grid" id="gallery-grid"></div><div class="empty-state" id="gallery-empty" style="display:none"><i class="fas fa-images"></i><p>No images yet. Upload some to get started.</p></div></div>
                 </div>
             </section>
 
-            <!-- SUBMISSIONS -->
             <section id="section-submissions" class="section">
                 <div class="panel">
-                    <div class="panel-header">
-                        <h2>Contact & Admissions Submissions</h2>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="seedSubmissions()">
-                            <i class="fas fa-sync me-1"></i> Load Sample Data
-                        </button>
+                    <div class="panel-header"><h2>Contact & Admissions Submissions</h2>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="seedSubmissions()"><i class="fas fa-sync me-1"></i> Load Sample Data</button>
                     </div>
-                    <div class="panel-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4">From</th>
-                                        <th>Type</th>
-                                        <th>Subject / Message</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th class="text-end pe-4">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="submissions-table-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="panel-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th class="ps-4">From</th><th>Type</th><th>Subject / Message</th><th>Date</th><th>Status</th><th class="text-end pe-4">Actions</th></tr></thead><tbody id="submissions-table-body"></tbody></table></div></div>
                 </div>
             </section>
 
-            <!-- USERS -->
             <section id="section-users" class="section">
                 <div class="panel">
-                    <div class="panel-header">
-                        <h2>User Management</h2>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openUserModal()">
-                            <i class="fas fa-user-plus me-1"></i> Add User
-                        </button>
+                    <div class="panel-header"><h2>User Management</h2>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openUserModal()"><i class="fas fa-user-plus me-1"></i> Add User</button>
                     </div>
-                    <div class="panel-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4">Username</th>
-                                        <th>Role</th>
-                                        <th>Created</th>
-                                        <th class="text-end pe-4">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-table-body"></tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="panel-body p-0"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th class="ps-4">Username</th><th>Role</th><th>Created</th><th class="text-end pe-4">Actions</th></tr></thead><tbody id="users-table-body"></tbody></table></div></div>
                 </div>
             </section>
 
-            <!-- ANALYTICS -->
             <section id="section-analytics" class="section">
                 <div class="row g-4">
-                    <div class="col-lg-8">
-                        <div class="panel">
-                            <div class="panel-header">
-                                <h2>Page Views (Last 7 Days)</h2>
-                            </div>
-                            <div class="panel-body">
-                                <div class="chart-container">
-                                    <canvas id="pageViewsChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="panel">
-                            <div class="panel-header">
-                                <h2>Traffic Sources</h2>
-                            </div>
-                            <div class="panel-body">
-                                <div class="chart-container" style="height:240px">
-                                    <canvas id="sourcesChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="col-lg-8"><div class="panel"><div class="panel-header"><h2>Page Views (Last 7 Days)</h2></div><div class="panel-body"><div class="chart-container"><canvas id="pageViewsChart"></canvas></div></div></div></div>
+                    <div class="col-lg-4"><div class="panel"><div class="panel-header"><h2>Traffic Sources</h2></div><div class="panel-body"><div class="chart-container" style="height:240px"><canvas id="sourcesChart"></canvas></div></div></div></div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- CONTENT MODAL -->
-    <div class="modal fade" id="contentModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="contentModalTitle">Edit Content</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="content-id">
-                    <div class="mb-3">
-                        <label class="form-label">Page</label>
-                        <select class="form-select" id="content-page">
-                            <option value="index">Home (index.html)</option>
-                            <option value="about">About</option>
-                            <option value="academics">Academics</option>
-                            <option value="admissions">Admissions</option>
-                            <option value="events">Events</option>
-                            <option value="gallery">Gallery</option>
-                            <option value="contact">Contact</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Section / Title</label>
-                        <input type="text" class="form-control" id="content-title" placeholder="e.g. Hero Title, Why Choose Us">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Content</label>
-                        <textarea class="form-control" id="content-body" rows="6" placeholder="Enter the content..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveContent()">Save Content</button>
-                </div>
-            </div>
+    <!-- Modals -->
+    <div class="modal fade" id="contentModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="contentModalTitle">Edit Content</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <input type="hidden" id="content-id">
+            <div class="mb-3"><label class="form-label">Page</label><select class="form-select" id="content-page"><option value="index">Home</option><option value="about">About</option><option value="academics">Academics</option><option value="admissions">Admissions</option><option value="events">Events</option><option value="gallery">Gallery</option><option value="contact">Contact</option></select></div>
+            <div class="mb-3"><label class="form-label">Section / Title</label><input type="text" class="form-control" id="content-title"></div>
+            <div class="mb-3"><label class="form-label">Content</label><textarea class="form-control" id="content-body" rows="6"></textarea></div>
         </div>
-    </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveContent()">Save Content</button></div>
+    </div></div></div>
 
-    <!-- EVENT MODAL -->
-    <div class="modal fade" id="eventModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="eventModalTitle">Add Event</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="event-id">
-                    <div class="mb-3">
-                        <label class="form-label">Event Title</label>
-                        <input type="text" class="form-control" id="event-title" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Date</label>
-                        <input type="date" class="form-control" id="event-date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Location</label>
-                        <input type="text" class="form-control" id="event-location" placeholder="School Hall, Sports Field...">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" id="event-desc" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Status</label>
-                        <select class="form-select" id="event-status">
-                            <option value="upcoming">Upcoming</option>
-                            <option value="ongoing">Ongoing</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveEvent()">Save Event</button>
-                </div>
-            </div>
+    <div class="modal fade" id="eventModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="eventModalTitle">Add Event</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <input type="hidden" id="event-id">
+            <div class="mb-3"><label class="form-label">Event Title</label><input type="text" class="form-control" id="event-title" required></div>
+            <div class="mb-3"><label class="form-label">Date</label><input type="date" class="form-control" id="event-date" required></div>
+            <div class="mb-3"><label class="form-label">Location</label><input type="text" class="form-control" id="event-location"></div>
+            <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" id="event-desc" rows="3"></textarea></div>
+            <div class="mb-3"><label class="form-label">Status</label><select class="form-select" id="event-status"><option value="upcoming">Upcoming</option><option value="ongoing">Ongoing</option><option value="completed">Completed</option></select></div>
         </div>
-    </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveEvent()">Save Event</button></div>
+    </div></div></div>
 
-    <!-- USER MODAL -->
-    <div class="modal fade" id="userModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="userModalTitle">Add User</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="user-id">
-                    <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input type="text" class="form-control" id="user-username" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Password</label>
-                        <input type="password" class="form-control" id="user-password" placeholder="Leave blank to keep current">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Role</label>
-                        <select class="form-select" id="user-role">
-                            <option value="Admin">Admin</option>
-                            <option value="Editor">Editor</option>
-                            <option value="Viewer">Viewer</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveUser()">Save User</button>
-                </div>
-            </div>
+    <div class="modal fade" id="userModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title" id="userModalTitle">Add User</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <input type="hidden" id="user-id">
+            <div class="mb-3"><label class="form-label">Username</label><input type="text" class="form-control" id="user-username" required></div>
+            <div class="mb-3"><label class="form-label">Password</label><input type="password" class="form-control" id="user-password" placeholder="Leave blank to keep current"></div>
+            <div class="mb-3"><label class="form-label">Role</label><select class="form-select" id="user-role"><option value="Admin">Admin</option><option value="Editor">Editor</option><option value="Viewer">Viewer</option></select></div>
         </div>
-    </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="saveUser()">Save User</button></div>
+    </div></div></div>
 
-    <!-- SUBMISSION VIEW MODAL -->
-    <div class="modal fade" id="submissionModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Submission Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body" id="submission-detail"></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" id="mark-replied-btn">Mark as Replied</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="submissionModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Submission Details</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body" id="submission-detail"></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-success" id="mark-replied-btn">Mark as Replied</button></div>
+    </div></div></div>
 
-    <!-- TOAST -->
-    <div class="toast-container">
-        <div id="toast" class="toast align-items-center text-bg-dark border-0" role="alert">
-            <div class="d-flex">
-                <div class="toast-body" id="toast-message"></div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>
-    </div>
+    <div class="toast-container"><div id="toast" class="toast align-items-center text-bg-dark border-0" role="alert"><div class="d-flex"><div class="toast-body" id="toast-message"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ===================== DATA LAYER (localStorage) =====================
-        const STORAGE_KEYS = {
-            users: 'stalos_admin_users',
-            content: 'stalos_admin_content',
-            events: 'stalos_admin_events',
-            gallery: 'stalos_admin_gallery',
-            submissions: 'stalos_admin_submissions',
-            session: 'stalos_admin_session'
-        };
+        // ========== SUPABASE CONFIG ==========
+        const SUPABASE_URL = 'https://qnufberljntpcgrympbw.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_5wcuF1P7fkhn4fvCCOWvng_AuCvUS-O';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function load(key) {
-            try { return JSON.parse(localStorage.getItem(key)) || []; }
-            catch { return []; }
+        const SESSION_KEY = 'stalos_admin_session';
+
+        // ========== HELPERS ==========
+        function showToast(msg) {
+            document.getElementById('toast-message').textContent = msg;
+            new bootstrap.Toast(document.getElementById('toast')).show();
+        }
+        function formatDate(iso) {
+            if (!iso) return '—';
+            return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>').replace(/"/g,'"');
+        }
+        function getSession() {
+            try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; }
+        }
+        function setSession(user) {
+            localStorage.setItem(SESSION_KEY, JSON.stringify({ username: user.username, role: user.role, loginAt: Date.now() }));
+        }
+        function clearSession() {
+            localStorage.removeItem(SESSION_KEY);
         }
 
-        function save(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-
-        // Seed default admin if none exist
-        function ensureDefaultUser() {
-            let users = load(STORAGE_KEYS.users);
-            if (users.length === 0) {
-                users = [{
-                    id: 'admin-1',
-                    username: 'admin',
-                    password: 'admin123',
-                    role: 'Admin',
-                    created: new Date().toISOString()
-                }];
-                save(STORAGE_KEYS.users, users);
+        // ========== AUTH ==========
+        async function login(username, password) {
+            const { data, error } = await supabase
+                .from('admin_users')
+                .select('*')
+                .eq('username', username)
+                .eq('password', password)
+                .maybeSingle();
+            if (error) {
+                console.error(error);
+                showToast('Login error: ' + error.message);
+                return false;
             }
-            return users;
-        }
-
-        // Seed sample content
-        function ensureSampleContent() {
-            let content = load(STORAGE_KEYS.content);
-            if (content.length === 0) {
-                content = [
-                    { id: 'c1', page: 'index', title: 'Hero Title', body: 'Inspiring excellence in every student', updated: new Date().toISOString() },
-                    { id: 'c2', page: 'index', title: 'Hero Subtitle', body: 'Discover a brighter future at St. Aloysius Senior Secondary School with engaging academics, caring teachers, and a supportive campus life.', updated: new Date().toISOString() },
-                    { id: 'c3', page: 'about', title: 'About Intro', body: 'St. Aloysius Senior Secondary School has been a beacon of quality education for over 65 years.', updated: new Date().toISOString() }
-                ];
-                save(STORAGE_KEYS.content, content);
-            }
-            return content;
-        }
-
-        // ===================== AUTH =====================
-        function login(username, password) {
-            const users = ensureDefaultUser();
-            const user = users.find(u => u.username === username && u.password === password);
-            if (user) {
-                const session = { username: user.username, role: user.role, loginAt: Date.now() };
-                localStorage.setItem(STORAGE_KEYS.session, JSON.stringify(session));
+            if (data) {
+                setSession(data);
                 return true;
             }
             return false;
         }
 
         function logout() {
-            localStorage.removeItem(STORAGE_KEYS.session);
+            clearSession();
             location.reload();
         }
 
-        function getSession() {
-            try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.session)); }
-            catch { return null; }
-        }
-
-        // ===================== UI HELPERS =====================
-        function showToast(msg) {
-            document.getElementById('toast-message').textContent = msg;
-            const t = new bootstrap.Toast(document.getElementById('toast'));
-            t.show();
-        }
-
-        function formatDate(iso) {
-            if (!iso) return '—';
-            return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-        }
-
-        function uid() {
-            return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-        }
-
-        // ===================== SECTIONS =====================
+        // ========== SECTIONS ==========
         function showSection(name) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
             const section = document.getElementById('section-' + name);
             if (section) section.classList.add('active');
-
             const nav = document.querySelector(`.nav-item[data-section="${name}"]`);
             if (nav) nav.classList.add('active');
-
-            const titles = {
-                dashboard: 'Dashboard',
-                content: 'Content Manager',
-                events: 'Events',
-                gallery: 'Gallery',
-                submissions: 'Submissions',
-                users: 'User Management',
-                analytics: 'Analytics'
-            };
+            const titles = { dashboard:'Dashboard', content:'Content Manager', events:'Events', gallery:'Gallery', submissions:'Submissions', users:'User Management', analytics:'Analytics' };
             document.getElementById('page-title').textContent = titles[name] || name;
-
-            // Close mobile sidebar
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('sidebar-overlay').classList.remove('show');
-
-            // Refresh section data
             if (name === 'dashboard') refreshDashboard();
             if (name === 'content') renderContent();
             if (name === 'events') renderEvents();
@@ -1066,518 +360,362 @@
             if (name === 'analytics') renderAnalytics();
         }
 
-        // ===================== DASHBOARD =====================
+        // ========== DASHBOARD ==========
         let visitorsChartInstance = null;
+        async function refreshDashboard() {
+            const [contentRes, eventsRes, galleryRes, submissionsRes] = await Promise.all([
+                supabase.from('content').select('id', { count: 'exact', head: true }),
+                supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'upcoming'),
+                supabase.from('gallery').select('id', { count: 'exact', head: true }),
+                supabase.from('submissions').select('id', { count: 'exact', head: true }).eq('status', 'new')
+            ]);
+            document.getElementById('stat-pages').textContent = contentRes.count || 0;
+            document.getElementById('stat-events').textContent = eventsRes.count || 0;
+            document.getElementById('stat-images').textContent = galleryRes.count || 0;
+            document.getElementById('stat-submissions').textContent = submissionsRes.count || 0;
 
-        function refreshDashboard() {
-            const content = load(STORAGE_KEYS.content);
-            const events = load(STORAGE_KEYS.events).filter(e => e.status === 'upcoming');
-            const gallery = load(STORAGE_KEYS.gallery);
-            const submissions = load(STORAGE_KEYS.submissions).filter(s => s.status === 'new');
-
-            document.getElementById('stat-pages').textContent = content.length;
-            document.getElementById('stat-events').textContent = events.length;
-            document.getElementById('stat-images').textContent = gallery.length;
-            document.getElementById('stat-submissions').textContent = submissions.length;
-
-            // Chart
             const ctx = document.getElementById('visitorsChart');
             if (visitorsChartInstance) visitorsChartInstance.destroy();
-
             visitorsChartInstance = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Visitors',
-                        data: [120, 190, 150, 220, 280, 210, 340],
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37,99,235,0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#2563eb'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                        x: { grid: { display: false } }
-                    }
-                }
+                data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label: 'Visitors', data: [120,190,150,220,280,210,340], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
             });
         }
 
-        // ===================== CONTENT =====================
-        function renderContent() {
-            const data = load(STORAGE_KEYS.content);
+        // ========== CONTENT ==========
+        async function renderContent() {
+            const { data, error } = await supabase.from('content').select('*').order('updated_at', { ascending: false });
             const tbody = document.getElementById('content-table-body');
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">No content yet. Click "Add Content".</td></tr>`;
-                return;
-            }
+            if (error) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-danger">Error: ${error.message}</td></tr>`; return; }
+            if (!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">No content yet.</td></tr>`; return; }
             tbody.innerHTML = data.map(item => `
                 <tr>
-                    <td class="ps-4"><span class="badge bg-light text-dark border">${item.page}</span></td>
-                    <td>
-                        <strong>${escapeHtml(item.title)}</strong><br>
-                        <small class="text-muted">${escapeHtml(item.body.substring(0, 60))}${item.body.length > 60 ? '…' : ''}</small>
-                    </td>
-                    <td>${formatDate(item.updated)}</td>
+                    <td class="ps-4"><span class="badge bg-light text-dark border">${escapeHtml(item.page)}</span></td>
+                    <td><strong>${escapeHtml(item.title)}</strong><br><small class="text-muted">${escapeHtml((item.body||'').substring(0,60))}${(item.body||'').length>60?'…':''}</small></td>
+                    <td>${formatDate(item.updated_at)}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-primary me-1" onclick="editContent('${item.id}')"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteContent('${item.id}')"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
         }
 
         function openContentModal(id = null) {
             document.getElementById('content-id').value = id || '';
             document.getElementById('contentModalTitle').textContent = id ? 'Edit Content' : 'Add Content';
-            if (id) {
-                const item = load(STORAGE_KEYS.content).find(c => c.id === id);
-                if (item) {
-                    document.getElementById('content-page').value = item.page;
-                    document.getElementById('content-title').value = item.title;
-                    document.getElementById('content-body').value = item.body;
-                }
-            } else {
-                document.getElementById('content-page').value = 'index';
-                document.getElementById('content-title').value = '';
-                document.getElementById('content-body').value = '';
+            if (!id) { document.getElementById('content-page').value = 'index'; document.getElementById('content-title').value = ''; document.getElementById('content-body').value = ''; }
+        }
+
+        async function editContent(id) {
+            const { data } = await supabase.from('content').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('content-id').value = data.id;
+                document.getElementById('content-page').value = data.page;
+                document.getElementById('content-title').value = data.title;
+                document.getElementById('content-body').value = data.body;
+                document.getElementById('contentModalTitle').textContent = 'Edit Content';
+                new bootstrap.Modal(document.getElementById('contentModal')).show();
             }
         }
 
-        function editContent(id) {
-            openContentModal(id);
-            new bootstrap.Modal(document.getElementById('contentModal')).show();
-        }
-
-        function saveContent() {
+        async function saveContent() {
             const id = document.getElementById('content-id').value;
             const page = document.getElementById('content-page').value;
             const title = document.getElementById('content-title').value.trim();
             const body = document.getElementById('content-body').value.trim();
+            if (!title || !body) { showToast('Please fill in title and content'); return; }
 
-            if (!title || !body) {
-                showToast('Please fill in title and content');
-                return;
-            }
-
-            let data = load(STORAGE_KEYS.content);
+            let error;
             if (id) {
-                data = data.map(c => c.id === id ? { ...c, page, title, body, updated: new Date().toISOString() } : c);
+                ({ error } = await supabase.from('content').update({ page, title, body, updated_at: new Date().toISOString() }).eq('id', id));
             } else {
-                data.push({ id: uid(), page, title, body, updated: new Date().toISOString() });
+                ({ error } = await supabase.from('content').insert({ page, title, body }));
             }
-            save(STORAGE_KEYS.content, data);
+            if (error) { showToast('Error: ' + error.message); return; }
             bootstrap.Modal.getInstance(document.getElementById('contentModal')).hide();
             renderContent();
-            showToast('Content saved successfully');
+            showToast('Content saved to database');
         }
 
-        function deleteContent(id) {
-            if (!confirm('Delete this content item?')) return;
-            let data = load(STORAGE_KEYS.content).filter(c => c.id !== id);
-            save(STORAGE_KEYS.content, data);
+        async function deleteContent(id) {
+            if (!confirm('Delete this content?')) return;
+            const { error } = await supabase.from('content').delete().eq('id', id);
+            if (error) { showToast('Error: ' + error.message); return; }
             renderContent();
             showToast('Content deleted');
         }
 
-        // ===================== EVENTS =====================
-        function renderEvents() {
-            const data = load(STORAGE_KEYS.events);
+        // ========== EVENTS ==========
+        async function renderEvents() {
+            const { data, error } = await supabase.from('events').select('*').order('event_date', { ascending: true });
             const tbody = document.getElementById('events-table-body');
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No events yet. Click "Add Event".</td></tr>`;
-                return;
-            }
+            if (error) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Error: ${error.message}</td></tr>`; return; }
+            if (!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No events yet.</td></tr>`; return; }
             const statusBadge = { upcoming: 'bg-primary', ongoing: 'bg-success', completed: 'bg-secondary' };
             tbody.innerHTML = data.map(e => `
                 <tr>
                     <td class="ps-4"><strong>${escapeHtml(e.title)}</strong></td>
-                    <td>${formatDate(e.date)}</td>
+                    <td>${formatDate(e.event_date)}</td>
                     <td>${escapeHtml(e.location || '—')}</td>
                     <td><span class="badge ${statusBadge[e.status] || 'bg-secondary'}">${e.status}</span></td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-primary me-1" onclick="editEvent('${e.id}')"><i class="fas fa-edit"></i></button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteEvent('${e.id}')"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
         }
 
         function openEventModal(id = null) {
             document.getElementById('event-id').value = id || '';
             document.getElementById('eventModalTitle').textContent = id ? 'Edit Event' : 'Add Event';
-            if (id) {
-                const e = load(STORAGE_KEYS.events).find(x => x.id === id);
-                if (e) {
-                    document.getElementById('event-title').value = e.title;
-                    document.getElementById('event-date').value = e.date ? e.date.substring(0, 10) : '';
-                    document.getElementById('event-location').value = e.location || '';
-                    document.getElementById('event-desc').value = e.description || '';
-                    document.getElementById('event-status').value = e.status || 'upcoming';
-                }
-            } else {
-                document.getElementById('event-title').value = '';
-                document.getElementById('event-date').value = '';
-                document.getElementById('event-location').value = '';
-                document.getElementById('event-desc').value = '';
-                document.getElementById('event-status').value = 'upcoming';
+            if (!id) { ['event-title','event-date','event-location','event-desc'].forEach(id => document.getElementById(id).value = ''); document.getElementById('event-status').value = 'upcoming'; }
+        }
+
+        async function editEvent(id) {
+            const { data } = await supabase.from('events').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('event-id').value = data.id;
+                document.getElementById('event-title').value = data.title;
+                document.getElementById('event-date').value = data.event_date ? data.event_date.substring(0,10) : '';
+                document.getElementById('event-location').value = data.location || '';
+                document.getElementById('event-desc').value = data.description || '';
+                document.getElementById('event-status').value = data.status || 'upcoming';
+                document.getElementById('eventModalTitle').textContent = 'Edit Event';
+                new bootstrap.Modal(document.getElementById('eventModal')).show();
             }
         }
 
-        function editEvent(id) {
-            openEventModal(id);
-            new bootstrap.Modal(document.getElementById('eventModal')).show();
-        }
-
-        function saveEvent() {
+        async function saveEvent() {
             const id = document.getElementById('event-id').value;
             const title = document.getElementById('event-title').value.trim();
-            const date = document.getElementById('event-date').value;
+            const event_date = document.getElementById('event-date').value;
             const location = document.getElementById('event-location').value.trim();
             const description = document.getElementById('event-desc').value.trim();
             const status = document.getElementById('event-status').value;
+            if (!title || !event_date) { showToast('Title and date are required'); return; }
 
-            if (!title || !date) {
-                showToast('Title and date are required');
-                return;
-            }
-
-            let data = load(STORAGE_KEYS.events);
+            let error;
             if (id) {
-                data = data.map(e => e.id === id ? { ...e, title, date, location, description, status } : e);
+                ({ error } = await supabase.from('events').update({ title, event_date, location, description, status }).eq('id', id));
             } else {
-                data.push({ id: uid(), title, date, location, description, status });
+                ({ error } = await supabase.from('events').insert({ title, event_date, location, description, status }));
             }
-            save(STORAGE_KEYS.events, data);
+            if (error) { showToast('Error: ' + error.message); return; }
             bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
             renderEvents();
-            showToast('Event saved');
+            showToast('Event saved to database');
         }
 
-        function deleteEvent(id) {
+        async function deleteEvent(id) {
             if (!confirm('Delete this event?')) return;
-            save(STORAGE_KEYS.events, load(STORAGE_KEYS.events).filter(e => e.id !== id));
+            const { error } = await supabase.from('events').delete().eq('id', id);
+            if (error) { showToast('Error: ' + error.message); return; }
             renderEvents();
             showToast('Event deleted');
         }
 
-        // ===================== GALLERY =====================
-        function renderGallery() {
-            const data = load(STORAGE_KEYS.gallery);
+        // ========== GALLERY ==========
+        async function renderGallery() {
+            const { data, error } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
             const grid = document.getElementById('gallery-grid');
             const empty = document.getElementById('gallery-empty');
-
-            if (data.length === 0) {
+            if (error || !data || data.length === 0) {
                 grid.innerHTML = '';
                 empty.style.display = 'block';
+                if (error) showToast('Gallery error: ' + error.message);
                 return;
             }
             empty.style.display = 'none';
             grid.innerHTML = data.map(img => `
                 <div class="gallery-item">
-                    <img src="${img.dataUrl}" alt="${escapeHtml(img.name)}">
-                    <div class="actions">
-                        <button class="btn btn-sm btn-danger" onclick="deleteImage('${img.id}')" title="Delete">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                    <img src="${img.image_url}" alt="${escapeHtml(img.name || '')}">
+                    <div class="actions"><button class="btn btn-sm btn-danger" onclick="deleteImage('${img.id}')"><i class="fas fa-trash"></i></button></div>
+                </div>`).join('');
         }
 
-        document.getElementById('image-upload')?.addEventListener('change', function(e) {
+        document.getElementById('image-upload')?.addEventListener('change', async function(e) {
             const files = Array.from(e.target.files);
             if (!files.length) return;
-
-            let gallery = load(STORAGE_KEYS.gallery);
-            let processed = 0;
-
-            files.forEach(file => {
+            showToast('Uploading...');
+            for (const file of files) {
                 const reader = new FileReader();
-                reader.onload = function(ev) {
-                    gallery.push({
-                        id: uid(),
-                        name: file.name,
-                        dataUrl: ev.target.result,
-                        added: new Date().toISOString()
-                    });
-                    processed++;
-                    if (processed === files.length) {
-                        save(STORAGE_KEYS.gallery, gallery);
-                        renderGallery();
-                        showToast(`${files.length} image(s) uploaded`);
-                    }
-                };
-                reader.readAsDataURL(file);
-            });
+                await new Promise(resolve => {
+                    reader.onload = async (ev) => {
+                        const { error } = await supabase.from('gallery').insert({ name: file.name, image_url: ev.target.result });
+                        if (error) showToast('Upload error: ' + error.message);
+                        resolve();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            renderGallery();
+            showToast(files.length + ' image(s) uploaded');
             e.target.value = '';
         });
 
-        function deleteImage(id) {
+        async function deleteImage(id) {
             if (!confirm('Delete this image?')) return;
-            save(STORAGE_KEYS.gallery, load(STORAGE_KEYS.gallery).filter(i => i.id !== id));
+            const { error } = await supabase.from('gallery').delete().eq('id', id);
+            if (error) { showToast('Error: ' + error.message); return; }
             renderGallery();
             showToast('Image deleted');
         }
 
-        // ===================== SUBMISSIONS =====================
-        function seedSubmissions() {
+        // ========== SUBMISSIONS ==========
+        async function seedSubmissions() {
             const samples = [
-                { id: uid(), name: 'Mary Nakato', email: 'mary@email.com', type: 'Admissions', subject: 'Application Inquiry', message: 'Hello, I would like information about applying for Senior One next year.', date: new Date().toISOString(), status: 'new' },
-                { id: uid(), name: 'John Okello', email: 'john.o@email.com', type: 'Contact', subject: 'Visit Request', message: 'Can we schedule a school tour for next week?', date: new Date(Date.now() - 86400000).toISOString(), status: 'new' },
-                { id: uid(), name: 'Sarah Achieng', email: 'sarah@email.com', type: 'Admissions', subject: 'Fee Structure', message: 'Please send the fee structure for day scholars.', date: new Date(Date.now() - 172800000).toISOString(), status: 'read' },
-                { id: uid(), name: 'Peter Mugisha', email: 'peter@email.com', type: 'Contact', subject: 'Partnership', message: 'Interested in discussing a community partnership.', date: new Date(Date.now() - 259200000).toISOString(), status: 'replied' }
+                { name: 'Mary Nakato', email: 'mary@email.com', type: 'Admissions', subject: 'Application Inquiry', message: 'Hello, I would like information about applying for Senior One next year.', status: 'new' },
+                { name: 'John Okello', email: 'john.o@email.com', type: 'Contact', subject: 'Visit Request', message: 'Can we schedule a school tour for next week?', status: 'new' },
+                { name: 'Sarah Achieng', email: 'sarah@email.com', type: 'Admissions', subject: 'Fee Structure', message: 'Please send the fee structure for day scholars.', status: 'read' },
+                { name: 'Peter Mugisha', email: 'peter@email.com', type: 'Contact', subject: 'Partnership', message: 'Interested in discussing a community partnership.', status: 'replied' }
             ];
-            save(STORAGE_KEYS.submissions, samples);
+            const { error } = await supabase.from('submissions').insert(samples);
+            if (error) { showToast('Error: ' + error.message); return; }
             renderSubmissions();
             showToast('Sample submissions loaded');
         }
 
-        function renderSubmissions() {
-            const data = load(STORAGE_KEYS.submissions);
+        async function renderSubmissions() {
+            const { data, error } = await supabase.from('submissions').select('*').order('created_at', { ascending: false });
             const tbody = document.getElementById('submissions-table-body');
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No submissions yet. Click "Load Sample Data" to see examples.</td></tr>`;
-                return;
-            }
+            if (error) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">Error: ${error.message}</td></tr>`; return; }
+            if (!data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">No submissions yet.</td></tr>`; return; }
             tbody.innerHTML = data.map(s => `
                 <tr>
-                    <td class="ps-4">
-                        <strong>${escapeHtml(s.name)}</strong><br>
-                        <small class="text-muted">${escapeHtml(s.email)}</small>
-                    </td>
+                    <td class="ps-4"><strong>${escapeHtml(s.name)}</strong><br><small class="text-muted">${escapeHtml(s.email)}</small></td>
                     <td><span class="badge bg-light text-dark border">${s.type}</span></td>
-                    <td>${escapeHtml(s.subject)}<br><small class="text-muted">${escapeHtml(s.message.substring(0, 40))}…</small></td>
-                    <td>${formatDate(s.date)}</td>
+                    <td>${escapeHtml(s.subject)}<br><small class="text-muted">${escapeHtml((s.message||'').substring(0,40))}…</small></td>
+                    <td>${formatDate(s.created_at)}</td>
                     <td><span class="badge-status badge-${s.status}">${s.status}</span></td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-primary me-1" onclick="viewSubmission('${s.id}')"><i class="fas fa-eye"></i></button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteSubmission('${s.id}')"><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
         }
 
         let currentSubmissionId = null;
-
-        function viewSubmission(id) {
+        async function viewSubmission(id) {
             currentSubmissionId = id;
-            const s = load(STORAGE_KEYS.submissions).find(x => x.id === id);
-            if (!s) return;
-
-            // Mark as read
-            if (s.status === 'new') {
-                let data = load(STORAGE_KEYS.submissions).map(x => x.id === id ? { ...x, status: 'read' } : x);
-                save(STORAGE_KEYS.submissions, data);
+            const { data } = await supabase.from('submissions').select('*').eq('id', id).single();
+            if (!data) return;
+            if (data.status === 'new') {
+                await supabase.from('submissions').update({ status: 'read' }).eq('id', id);
             }
-
             document.getElementById('submission-detail').innerHTML = `
-                <p><strong>From:</strong> ${escapeHtml(s.name)} (${escapeHtml(s.email)})</p>
-                <p><strong>Type:</strong> ${s.type}</p>
-                <p><strong>Date:</strong> ${formatDate(s.date)}</p>
-                <p><strong>Subject:</strong> ${escapeHtml(s.subject)}</p>
-                <hr>
-                <p>${escapeHtml(s.message)}</p>
-            `;
+                <p><strong>From:</strong> ${escapeHtml(data.name)} (${escapeHtml(data.email)})</p>
+                <p><strong>Type:</strong> ${data.type}</p>
+                <p><strong>Date:</strong> ${formatDate(data.created_at)}</p>
+                <p><strong>Subject:</strong> ${escapeHtml(data.subject)}</p><hr>
+                <p>${escapeHtml(data.message)}</p>`;
             new bootstrap.Modal(document.getElementById('submissionModal')).show();
             renderSubmissions();
         }
 
-        document.getElementById('mark-replied-btn')?.addEventListener('click', () => {
+        document.getElementById('mark-replied-btn')?.addEventListener('click', async () => {
             if (!currentSubmissionId) return;
-            let data = load(STORAGE_KEYS.submissions).map(x =>
-                x.id === currentSubmissionId ? { ...x, status: 'replied' } : x
-            );
-            save(STORAGE_KEYS.submissions, data);
+            await supabase.from('submissions').update({ status: 'replied' }).eq('id', currentSubmissionId);
             bootstrap.Modal.getInstance(document.getElementById('submissionModal')).hide();
             renderSubmissions();
             showToast('Marked as replied');
         });
 
-        function deleteSubmission(id) {
+        async function deleteSubmission(id) {
             if (!confirm('Delete this submission?')) return;
-            save(STORAGE_KEYS.submissions, load(STORAGE_KEYS.submissions).filter(s => s.id !== id));
+            await supabase.from('submissions').delete().eq('id', id);
             renderSubmissions();
             showToast('Submission deleted');
         }
 
-        // ===================== USERS =====================
-        function renderUsers() {
-            const data = ensureDefaultUser();
+        // ========== USERS ==========
+        async function renderUsers() {
+            const { data, error } = await supabase.from('admin_users').select('*').order('created_at', { ascending: true });
             const tbody = document.getElementById('users-table-body');
-            tbody.innerHTML = data.map(u => `
+            if (error) { tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-danger">Error: ${error.message}</td></tr>`; return; }
+            tbody.innerHTML = (data || []).map(u => `
                 <tr>
                     <td class="ps-4"><strong>${escapeHtml(u.username)}</strong></td>
                     <td><span class="badge bg-primary">${u.role}</span></td>
-                    <td>${formatDate(u.created)}</td>
+                    <td>${formatDate(u.created_at)}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-outline-primary me-1" onclick="editUser('${u.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}')" ${u.username === 'admin' ? 'disabled title="Cannot delete default admin"' : ''}>
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}', '${u.username}')" ${u.username === 'admin' ? 'disabled' : ''}><i class="fas fa-trash"></i></button>
                     </td>
-                </tr>
-            `).join('');
+                </tr>`).join('');
         }
 
         function openUserModal(id = null) {
             document.getElementById('user-id').value = id || '';
             document.getElementById('userModalTitle').textContent = id ? 'Edit User' : 'Add User';
-            if (id) {
-                const u = load(STORAGE_KEYS.users).find(x => x.id === id);
-                if (u) {
-                    document.getElementById('user-username').value = u.username;
-                    document.getElementById('user-password').value = '';
-                    document.getElementById('user-role').value = u.role;
-                }
-            } else {
-                document.getElementById('user-username').value = '';
+            if (!id) { document.getElementById('user-username').value = ''; document.getElementById('user-password').value = ''; document.getElementById('user-role').value = 'Editor'; }
+        }
+
+        async function editUser(id) {
+            const { data } = await supabase.from('admin_users').select('*').eq('id', id).single();
+            if (data) {
+                document.getElementById('user-id').value = data.id;
+                document.getElementById('user-username').value = data.username;
                 document.getElementById('user-password').value = '';
-                document.getElementById('user-role').value = 'Editor';
+                document.getElementById('user-role').value = data.role;
+                document.getElementById('userModalTitle').textContent = 'Edit User';
+                new bootstrap.Modal(document.getElementById('userModal')).show();
             }
         }
 
-        function editUser(id) {
-            openUserModal(id);
-            new bootstrap.Modal(document.getElementById('userModal')).show();
-        }
-
-        function saveUser() {
+        async function saveUser() {
             const id = document.getElementById('user-id').value;
             const username = document.getElementById('user-username').value.trim();
             const password = document.getElementById('user-password').value;
             const role = document.getElementById('user-role').value;
+            if (!username) { showToast('Username is required'); return; }
 
-            if (!username) {
-                showToast('Username is required');
-                return;
-            }
-
-            let data = load(STORAGE_KEYS.users);
-
+            let error;
             if (id) {
-                data = data.map(u => {
-                    if (u.id === id) {
-                        return {
-                            ...u,
-                            username,
-                            password: password ? password : u.password,
-                            role
-                        };
-                    }
-                    return u;
-                });
+                const updates = { username, role };
+                if (password) updates.password = password;
+                ({ error } = await supabase.from('admin_users').update(updates).eq('id', id));
             } else {
-                if (!password) {
-                    showToast('Password is required for new users');
-                    return;
-                }
-                if (data.some(u => u.username === username)) {
-                    showToast('Username already exists');
-                    return;
-                }
-                data.push({ id: uid(), username, password, role, created: new Date().toISOString() });
+                if (!password) { showToast('Password is required for new users'); return; }
+                ({ error } = await supabase.from('admin_users').insert({ username, password, role }));
             }
-
-            save(STORAGE_KEYS.users, data);
+            if (error) { showToast('Error: ' + error.message); return; }
             bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
             renderUsers();
             showToast('User saved');
         }
 
-        function deleteUser(id) {
-            const users = load(STORAGE_KEYS.users);
-            const user = users.find(u => u.id === id);
-            if (user?.username === 'admin') {
-                showToast('Cannot delete the default admin');
-                return;
-            }
+        async function deleteUser(id, username) {
+            if (username === 'admin') { showToast('Cannot delete default admin'); return; }
             if (!confirm('Delete this user?')) return;
-            save(STORAGE_KEYS.users, users.filter(u => u.id !== id));
+            await supabase.from('admin_users').delete().eq('id', id);
             renderUsers();
             showToast('User deleted');
         }
 
-        // ===================== ANALYTICS =====================
-        let pageViewsChart = null;
-        let sourcesChart = null;
-
+        // ========== ANALYTICS ==========
+        let pageViewsChart = null, sourcesChart = null;
         function renderAnalytics() {
             const ctx1 = document.getElementById('pageViewsChart');
             if (pageViewsChart) pageViewsChart.destroy();
             pageViewsChart = new Chart(ctx1, {
                 type: 'bar',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Page Views',
-                        data: [420, 380, 510, 460, 590, 320, 280],
-                        backgroundColor: 'rgba(37, 99, 235, 0.75)',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
-                        x: { grid: { display: false } }
-                    }
-                }
+                data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets: [{ label: 'Page Views', data: [420,380,510,460,590,320,280], backgroundColor: 'rgba(37,99,235,0.75)', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
             });
-
             const ctx2 = document.getElementById('sourcesChart');
             if (sourcesChart) sourcesChart.destroy();
             sourcesChart = new Chart(ctx2, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Direct', 'Google', 'Social', 'Referral'],
-                    datasets: [{
-                        data: [45, 30, 15, 10],
-                        backgroundColor: ['#2563eb', '#ec4899', '#10b981', '#f59e0b'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
-                    }
-                }
+                data: { labels: ['Direct','Google','Social','Referral'], datasets: [{ data: [45,30,15,10], backgroundColor: ['#2563eb','#ec4899','#10b981','#f59e0b'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
             });
         }
 
-        // ===================== UTILS =====================
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&')
-                .replace(/</g, '<')
-                .replace(/>/g, '>')
-                .replace(/"/g, '"');
-        }
-
-        // ===================== INIT =====================
+        // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', () => {
-            // Date
-            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB', {
-                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-            });
+            document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-            // Ensure defaults
-            ensureDefaultUser();
-            ensureSampleContent();
-
-            // Check session
             const session = getSession();
             if (session) {
                 document.getElementById('login-screen').style.display = 'none';
@@ -1587,13 +725,17 @@
                 showSection('dashboard');
             }
 
-            // Login form
-            document.getElementById('login-form').addEventListener('submit', (e) => {
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                const btn = document.getElementById('login-btn');
+                btn.disabled = true;
+                btn.textContent = 'Signing in...';
                 const username = document.getElementById('username').value.trim();
                 const password = document.getElementById('password').value;
-
-                if (login(username, password)) {
+                const ok = await login(username, password);
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+                if (ok) {
                     document.getElementById('login-screen').style.display = 'none';
                     document.getElementById('app').style.display = 'block';
                     document.getElementById('current-user').textContent = username;
@@ -1605,15 +747,8 @@
                 }
             });
 
-            // Logout
             document.getElementById('logout-btn').addEventListener('click', logout);
-
-            // Nav items
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.addEventListener('click', () => showSection(btn.dataset.section));
-            });
-
-            // Mobile sidebar
+            document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.section)));
             document.getElementById('mobile-toggle').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('open');
                 document.getElementById('sidebar-overlay').classList.toggle('show');
